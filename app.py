@@ -4,6 +4,7 @@ from PIL import Image
 import json
 from flask import Flask, request, jsonify, render_template
 
+#Luo tarvittavat tiedostot/varmistaa niiden olemassaolon
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 VECTOR_FILE = 'vectors.json'
@@ -11,11 +12,12 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+#vektoroi
 def image_to_vector(image_path):
     with Image.open(image_path) as img:
-        img = img.convert("L")  # Muutetaan harmaasävyksi
-        img = img.resize((32, 32))  # Normalisoidaan koko
-        vector = np.array(img).flatten().tolist()  # Muutetaan vektoriksi
+        img = img.convert("L")
+        img = img.resize((32, 32))
+        vector = np.array(img).flatten().tolist()
     return vector
 
 def save_vector_to_file(file_name, vector):
@@ -32,6 +34,7 @@ def save_vector_to_file(file_name, vector):
     with open(VECTOR_FILE, 'w') as f:
         json.dump(data, f, indent=4)
 
+#käyttää html sivua
 @app.route('/')
 def index():
     return render_template('index.html')
