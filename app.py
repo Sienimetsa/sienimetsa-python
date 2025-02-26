@@ -13,9 +13,11 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 #vektoroi
+#silleen että ottaa vaan tietyt pikselit kuvasta --> katso netistä miten saa keskitettyä siihen
+#poista tausta kuvista jos mahdollista
+#katso yolov8 custom database 
 def image_to_vector(image_path):
     with Image.open(image_path) as img:
-        img = img.convert("L")
         img = img.resize((32, 32))
         vector = np.array(img).flatten().tolist()
     return vector
