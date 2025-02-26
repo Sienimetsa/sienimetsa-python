@@ -6,17 +6,31 @@ from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
+VECTOR_FILE = 'vectors.json'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-#muuntaa kuvan vektoriksi
 def image_to_vector(image_path):
     with Image.open(image_path) as img:
-        img = img.convert("L") 
-        img = img.resize((32, 32))
-        vector = np.array(img).flatten().tolist()
+        img = img.convert("L")  # Muutetaan harmaasävyksi
+        img = img.resize((32, 32))  # Normalisoidaan koko
+        vector = np.array(img).flatten().tolist()  # Muutetaan vektoriksi
     return vector
+
+def save_vector_to_file(file_name, vector):
+    data = {}
+    if os.path.exists(VECTOR_FILE):
+        with open(VECTOR_FILE, 'r') as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError:
+                data = {}
+    
+    data[file_name] = ','.join(map(str, vector))  # Tallennetaan vektorit merkkijonona yhteen riville
+    
+    with open(VECTOR_FILE, 'w') as f:
+        json.dump(data, f, indent=4)
 
 @app.route('/')
 def index():
@@ -29,9 +43,18 @@ def upload_image():
     
     file = request.files['image']
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+    
+    # Varmistetaan, että tiedosto tallennetaan eri nimellä, jos samanniminen on jo olemassa
+    base, ext = os.path.splitext(file.filename)
+    counter = 1
+    while os.path.exists(file_path):
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{base}_{counter}{ext}")
+        counter += 1
+    
     file.save(file_path)
     
     vector = image_to_vector(file_path)
+    save_vector_to_file(os.path.basename(file_path), vector)
     
     return jsonify({"vector": vector, "file_path": file_path})
 
