@@ -26,12 +26,12 @@ rf2 = Roboflow(api_key=api_key)
 project2 = rf2.workspace().project("fungeye")
 model2 = project2.version(2).model
 
-rf3 = Roboflow(api_key="DLcTg0ZnoZqc6Q4v2kiQ")
+rf3 = Roboflow(api_key=api_key)
 project3 = rf3.workspace().project("task2-hfjmv")
 model3 = project3.version(2).model
 
 
-rf4 = Roboflow(api_key="DLcTg0ZnoZqc6Q4v2kiQ")
+rf4 = Roboflow(api_key=api_key)
 project4 = rf4.workspace().project("mushrooms-d36vk")
 model4 = project4.version(3).model
 
