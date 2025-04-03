@@ -4,8 +4,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mushroom indentifier</title>
+    <title>Mushroom Identifier</title>
     <script>
+        
+        function previewImage(event) {
+            const image = document.getElementById("uploadedImage");
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                image.src = e.target.result;
+                image.style.display = "block";
+            }
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+
+        
         function uploadImage(event) {
             event.preventDefault();
 
@@ -13,30 +30,65 @@
             let imageFile = document.getElementById("imageInput").files[0];
             formData.append("image", imageFile);
 
+            
             fetch("/upload", {
                 method: "POST",
                 body: formData
             })
                 .then(response => response.json())
                 .then(data => {
+                    console.log("DEBUG: Received response", data);
+
+                    
                     if (data.error) {
                         document.getElementById("result").innerHTML = `<p style="color:red;">${data.error}</p>`;
-                    } else {
-                        let predictions = data.prediction.predictions;
-                        let output = "<h3>Prediction:</h3>";
-
-                        if (predictions.length > 0) {
-                            predictions.forEach(pred => {
-                                output += `<p><strong>Mushroom class:</strong> ${pred.class} <br> <strong>Prediction %:</strong> ${(pred.confidence * 100).toFixed(2)}%</p>`;
-                            });
-                        } else {
-                            output += "<p>Other than chanterelle(?) lol</p>";
-                        }
-                        document.getElementById("uploadedImage").src = URL.createObjectURL(imageFile);
-                        document.getElementById("uploadedImage").style.display = "block";
-
-                        document.getElementById("result").innerHTML = output;
+                        return;
                     }
+
+                    
+                    let predictions1 = data.model1_prediction.predictions || [];
+                    let predictions2 = data.model2_prediction.predictions || [];
+                    let predictions3 = data.model3_prediction.predictions || [];
+                    let predictions4 = data.model4_prediction.predictions || [];
+
+                    let output = "<h3>Predictions:</h3>";
+
+                    
+                    output += "<h4>Model 1 (mushroom-xtwbh):</h4>";
+                    predictions1.forEach(pred => {
+                        output += `<p><strong>Class:</strong> ${pred.class} <br> <strong>Confidence:</strong> ${(pred.confidence * 100).toFixed(2)}%</p>`;
+                    });
+
+                    
+                    output += "<h4>Model 2 (fungeye):</h4>";
+                    predictions2.forEach(pred => {
+                        output += `<p><strong>Class:</strong> ${pred.class} <br> <strong>Confidence:</strong> ${(pred.confidence * 100).toFixed(2)}%</p>`;
+                    });
+
+                    
+                    output += "<h4>Model 3 (task2-hfjmv):</h4>";
+                    predictions3.forEach(pred => {
+                        output += `<p><strong>Class:</strong> ${pred.class} <br> <strong>Confidence:</strong> ${(pred.confidence * 100).toFixed(2)}%</p>`;
+                    });
+
+                    
+                    output += "<h4>Model 4 (mushroom-nksu4):</h4>";
+                    predictions4.forEach(pred => {
+                        output += `<p><strong>Class:</strong> ${pred.class} <br> <strong>Confidence:</strong> ${(pred.confidence * 100).toFixed(2)}%</p>`;
+                    });
+
+                    
+                    document.getElementById("uploadedImage").style.display = "none"; 
+
+                    let annotatedImageURL = data.annotated_image_url;
+                    let annotatedImage = document.createElement("img");
+                    annotatedImage.src = annotatedImageURL;
+                    annotatedImage.style.maxWidth = "300px";
+                    document.getElementById("annotatedImageContainer").innerHTML = "";
+                    document.getElementById("annotatedImageContainer").appendChild(annotatedImage);
+
+                    // Display the predictions output
+                    document.getElementById("result").innerHTML = output;
                 })
                 .catch(error => console.error("Error:", error));
         }
@@ -44,12 +96,18 @@
 </head>
 
 <body>
-    <h1>Mushroom indentifier</h1>
+    <h1>Mushroom Identifier</h1>
+
     <form onsubmit="uploadImage(event)">
-        <input type="file" id="imageInput" accept="image/*" required>
+        <input type="file" id="imageInput" accept="image/*" required onchange="previewImage(event)">
         <button type="submit">Submit</button>
     </form>
+
+    <h3>Uploaded Image:</h3>
     <img id="uploadedImage" style="max-width: 300px; display: none;">
+
+    <div id="annotatedImageContainer"></div>
+
     <div id="result"></div>
 </body>
 
