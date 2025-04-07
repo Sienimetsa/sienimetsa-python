@@ -28,10 +28,6 @@ rf2 = Roboflow(api_key=api_key)
 project2 = rf2.workspace().project("fungeye")
 model2 = project2.version(2).model
 
-rf3 = Roboflow(api_key=api_key)
-project3 = rf3.workspace().project("task2-hfjmv")
-model3 = project3.version(2).model
-
 rf4 = Roboflow(api_key=api_key)
 project4 = rf4.workspace().project("mushrooms-d36vk")
 model4 = project4.version(3).model
@@ -58,7 +54,6 @@ def upload_image():
     
     prediction1 = model1.predict(file_path, confidence=30, overlap=30).json()
     prediction2 = model2.predict(file_path, confidence=30, overlap=30).json()
-    prediction3 = model3.predict(file_path, confidence=40, overlap=30).json()
     prediction4 = model4.predict(file_path, confidence=40, overlap=30).json()
     prediction5 = model5.predict(file_path, confidence=40, overlap=30).json()
 
@@ -78,7 +73,6 @@ def upload_image():
 
     detections1, labels1 = extract_detections(prediction1)
     detections2, labels2 = extract_detections(prediction2)
-    detections3, labels3 = extract_detections(prediction3)
     detections4, labels4 = extract_detections(prediction4)
     detections5, labels5 = extract_detections(prediction5)
 
@@ -97,10 +91,6 @@ def upload_image():
     if not detections2.is_empty():
         image = box_annotator.annotate(scene=image, detections=detections2)
         image = label_annotator.annotate(scene=image, detections=detections2, labels=labels2)
-    
-    if not detections3.is_empty():
-        image = box_annotator.annotate(scene=image, detections=detections3)
-        image = label_annotator.annotate(scene=image, detections=detections3, labels=labels3)
 
     if not detections4.is_empty():
         image = box_annotator.annotate(scene=image, detections=detections4)
@@ -117,7 +107,6 @@ def upload_image():
     return jsonify({
         "model1_prediction": prediction1,
         "model2_prediction": prediction2,
-        "model3_prediction": prediction3,
         "model4_prediction": prediction4,
         "model5_prediction": prediction5,
         "annotated_image_url": f"/annotated/{file.filename}"

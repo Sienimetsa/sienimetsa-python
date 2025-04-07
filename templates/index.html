@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mushroom Identifier</title>
     <script>
-        // Image preview function before upload
         function previewImage(event) {
             const image = document.getElementById("uploadedImage");
             const file = event.target.files[0];
@@ -21,8 +20,6 @@
                 reader.readAsDataURL(file);
             }
         }
-
-        // Upload image and fetch predictions from the server
         function uploadImage(event) {
             event.preventDefault();
 
@@ -30,7 +27,6 @@
             let imageFile = document.getElementById("imageInput").files[0];
             formData.append("image", imageFile);
 
-            // Sending image to the server
             fetch("/upload", {
                 method: "POST",
                 body: formData
@@ -39,52 +35,44 @@
                 .then(data => {
                     console.log("DEBUG: Received response", data);
 
-                    // Handle any errors from the server
+                    
                     if (data.error) {
                         document.getElementById("result").innerHTML = `<p style="color:red;">${data.error}</p>`;
                         return;
                     }
 
-                    // Extract predictions for each model
+                    //predictions
                     let predictions1 = data.model1_prediction.predictions || [];
                     let predictions2 = data.model2_prediction.predictions || [];
-                    let predictions3 = data.model3_prediction.predictions || [];
                     let predictions4 = data.model4_prediction.predictions || [];
-                    let predictions5 = data.model5_prediction.predictions || [];  // Model 5 predictions
+                    let predictions5 = data.model5_prediction.predictions || [];
 
                     let output = "<h3>Predictions:</h3>";
 
-                    // Display Model 1 predictions
-                    output += "<h4>Model 1 (mushroom-xtwbh):</h4>";
+                    //model1
+                    output += "<h4>Model 1:</h4>";
                     predictions1.forEach(pred => {
                         output += `<p><strong>Class:</strong> ${pred.class} <br> <strong>Confidence:</strong> ${(pred.confidence * 100).toFixed(2)}%</p>`;
                     });
 
-                    // Display Model 2 predictions
-                    output += "<h4>Model 2 (fungeye):</h4>";
+                    //Model 2
+                    output += "<h4>Model 2:</h4>";
                     predictions2.forEach(pred => {
                         output += `<p><strong>Class:</strong> ${pred.class} <br> <strong>Confidence:</strong> ${(pred.confidence * 100).toFixed(2)}%</p>`;
                     });
 
-                    // Display Model 3 predictions
-                    output += "<h4>Model 3 (task2-hfjmv):</h4>";
-                    predictions3.forEach(pred => {
-                        output += `<p><strong>Class:</strong> ${pred.class} <br> <strong>Confidence:</strong> ${(pred.confidence * 100).toFixed(2)}%</p>`;
-                    });
-
-                    // Display Model 4 predictions
-                    output += "<h4>Model 4 (mushroom-nksu4):</h4>";
+                    //model 4
+                    output += "<h4>Model 4:</h4>";
                     predictions4.forEach(pred => {
                         output += `<p><strong>Class:</strong> ${pred.class} <br> <strong>Confidence:</strong> ${(pred.confidence * 100).toFixed(2)}%</p>`;
                     });
 
-                    // Display Model 5 predictions
-                    output += "<h4>Model 5 (mushroom-nksu4 version 2):</h4>";  // New section for model 5
+                    //model5
+                    output += "<h4>Model 5:</h4>";  // New section for model 5
                     predictions5.forEach(pred => {
                         output += `<p><strong>Class:</strong> ${pred.class} <br> <strong>Confidence:</strong> ${(pred.confidence * 100).toFixed(2)}%</p>`;
                     });
 
-                    // Hide the uploaded image and show the annotated image
                     document.getElementById("uploadedImage").style.display = "none"; 
 
                     let annotatedImageURL = data.annotated_image_url;
@@ -94,7 +82,7 @@
                     document.getElementById("annotatedImageContainer").innerHTML = "";
                     document.getElementById("annotatedImageContainer").appendChild(annotatedImage);
 
-                    // Display the predictions output
+                    //Output
                     document.getElementById("result").innerHTML = output;
                 })
                 .catch(error => console.error("Error:", error));
