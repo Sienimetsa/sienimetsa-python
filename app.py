@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 
 
 app = Flask(__name__)
+
+#create folders for uploads etc
 UPLOAD_FOLDER = 'uploads'
 ANNOTATED_FOLDER = 'annotated'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -17,7 +19,7 @@ os.makedirs(ANNOTATED_FOLDER, exist_ok=True)
 load_dotenv()
 api_key = os.getenv('ROBOFLOW_API_KEY')
 
-
+#roboflow models
 rf1 = Roboflow(api_key=api_key)
 project1 = rf1.workspace().project("mushroom-xtwbh")
 model1 = project1.version(1).model
@@ -30,17 +32,20 @@ rf3 = Roboflow(api_key=api_key)
 project3 = rf3.workspace().project("task2-hfjmv")
 model3 = project3.version(2).model
 
-
 rf4 = Roboflow(api_key=api_key)
 project4 = rf4.workspace().project("mushrooms-d36vk")
 model4 = project4.version(3).model
+
+rf5 = Roboflow(api_key=api_key)
+project5 = rf5.workspace().project("mushroom-nksu4")
+model5 = project5.version(2).model
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/')
 def index():
     return render_template('index.html')
-
+#upload image
 @app.route('/upload', methods=['POST'])
 def upload_image():
     if 'image' not in request.files:
@@ -55,6 +60,7 @@ def upload_image():
     prediction2 = model2.predict(file_path, confidence=30, overlap=30).json()
     prediction3 = model3.predict(file_path, confidence=40, overlap=30).json()
     prediction4 = model4.predict(file_path, confidence=40, overlap=30).json()
+    prediction5 = model5.predict(file_path, confidence=40, overlap=30).json()
 
     
     def extract_detections(prediction):
@@ -74,6 +80,7 @@ def upload_image():
     detections2, labels2 = extract_detections(prediction2)
     detections3, labels3 = extract_detections(prediction3)
     detections4, labels4 = extract_detections(prediction4)
+    detections5, labels5 = extract_detections(prediction5)
 
     
     image = cv2.imread(file_path)
@@ -99,6 +106,10 @@ def upload_image():
         image = box_annotator.annotate(scene=image, detections=detections4)
         image = label_annotator.annotate(scene=image, detections=detections4, labels=labels4)
 
+    if not detections5.is_empty():
+        image = box_annotator.annotate(scene=image, detections=detections5)
+        image = label_annotator.annotate(scene=image, detections=detections5, labels=labels5)
+
     
     annotated_path = os.path.join(ANNOTATED_FOLDER, "annotated_" + file.filename)
     cv2.imwrite(annotated_path, image)
@@ -108,6 +119,7 @@ def upload_image():
         "model2_prediction": prediction2,
         "model3_prediction": prediction3,
         "model4_prediction": prediction4,
+        "model5_prediction": prediction5,
         "annotated_image_url": f"/annotated/{file.filename}"
     })
 
