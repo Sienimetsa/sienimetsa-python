@@ -4,6 +4,7 @@ import supervision as sv
 import cv2
 import numpy as np
 import os
+import logging
 from dotenv import load_dotenv
 
 
@@ -16,8 +17,15 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(ANNOTATED_FOLDER, exist_ok=True)
 
 
-load_dotenv()
-api_key = os.getenv('ROBOFLOW_API_KEY')
+if os.environ.get("FLASK_ENV") != "production":
+    from dotenv import load_dotenv
+    load_dotenv()
+
+api_key = os.environ.get("ROBOFLOW_API_KEY")
+
+if not api_key:
+    logging.error("ROBOFLOW_API_KEY is not set! App will crash.")
+    raise EnvironmentError("Missing ROBOFLOW_API_KEY in environment.")
 
 #roboflow models
 rf1 = Roboflow(api_key=api_key)
